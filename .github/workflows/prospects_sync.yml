@@ -1,0 +1,36 @@
+name: Current Day Prospects → Google Sheets (Daily)
+
+on:
+  schedule:
+    # 6am IST = 12:30am UTC
+    - cron: "30 0 * * *"
+
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  sync:
+    name: Sync Current Day Prospects to Sheets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run prospects_to_sheets.py
+        env:
+          METABASE_URL:              ${{ secrets.METABASE_URL }}
+          METABASE_USERNAME:         ${{ secrets.METABASE_USERNAME }}
+          METABASE_PASSWORD:         ${{ secrets.METABASE_PASSWORD }}
+          GOOGLE_SHEET_ID:           ${{ secrets.GOOGLE_SHEET_ID }}
+          GCP_SERVICE_ACCOUNT_JSON:  ${{ secrets.GCP_SERVICE_ACCOUNT_JSON }}
+        run: python prospects_to_sheets.py
